@@ -17,7 +17,7 @@ const {
     hostElection,
 } = require("../controllers/election.controller")
 
-router.route("/").get(verifyToken, getElection)
+router.route("/").get(getElection)
 router.route("/").post(verifyToken, createElection)
 router.route("/").delete(verifyToken, deleteElection)
 router.route("/host").post(verifyToken, hostElection)

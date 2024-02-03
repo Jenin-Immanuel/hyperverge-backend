@@ -11,6 +11,7 @@ const {
     login,
     isVoterAdmin,
     getVoterByToken,
+    validateToken,
 } = require("../controllers/voter.controller")
 
 const router = express.Router()
@@ -23,5 +24,6 @@ router.route("/getVoterByMail").post(getVoterByMail)
 router.route("/login").post(login)
 router.route("/isVoterAdmin").post(isVoterAdmin)
 router.route("/getVoterByToken").get(verifyToken, getVoterByToken)
+router.route("/validateToken").post(validateToken)
 
 module.exports = router

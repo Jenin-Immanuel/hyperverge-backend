@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken")
 
 const generateToken = require("../helpers/generateToken")
 const nodemailer = require("nodemailer")
+const TokenModel = require("../models/token.model")
 
 const BASE_URL = process.env.FRONT_URL || "http://localhost:8080"
 
@@ -84,10 +85,11 @@ const createTokenForVoter = async (req, res) => {
         return res.status(404).json({ error: "Voter not found" })
     }
     const token = generateToken(32)
+    new TokenModel({ token: token, isUsed: false }).save()
     voter.token = token
     await voter.save()
 
-    const url = BASE_URL + "/voting?token=" + token
+    const url = BASE_URL + "/?token=" + token
 
     const message = `You can vote by clicking on the link below\n\n${url}`
 
@@ -121,6 +123,21 @@ const createTokenForVoter = async (req, res) => {
     return res.json({ msg: "Email sent" })
 }
 
+const validateToken = async (req, res) => {
+    const token = req.body.token
+    const tokenObj = await TokenModel.findOne({ token: token })
+    if (tokenObj === null) {
+        return res.status(404).json({ error: "Token not found" })
+    }
+    if (tokenObj.isUsed) {
+        return res.status(401).json({ error: "Token already used" })
+    }
+    tokenObj.isUsed = true
+    await tokenObj.save()
+
+    return res.json({ msg: "Token validated" })
+}
+
 const isVoterAdmin = async (req, res) => {
     const email = req.body.email
     const voter = await VoterModel.findOne({ email: email })
@@ -145,4 +162,5 @@ module.exports = {
     login,
     isVoterAdmin,
     getVoterByToken,
+    validateToken,
 }
